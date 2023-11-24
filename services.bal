@@ -1,106 +1,83 @@
-import ballerina/sql;
-import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
-
-public type Citizen record {|
-    int id?;
-    string nic;
-    string fullname;
-    boolean offenses = false;
-|};
-
-public type Offense record {|
-    int id?;
-    string offense;
-    int citizen_id;
-|};
-
-configurable string USER = ?;
-configurable string PASSWORD = ?;
-configurable string HOST = ?;
-configurable int PORT = ?;
-configurable string DATABASE = ?;
-
-final mysql:Client dbClient = check new (
-    host = HOST, user = USER, password = PASSWORD, port = PORT, database = DATABASE
-);
-
-isolated function addCitizen(Citizen citizen) returns int|error {
-    sql:ExecutionResult result = check dbClient->execute(`
-        INSERT INTO Citizen (nic,fullname, offenses)
-        VALUES ( '${citizen.nic}', '${citizen.fullname}', ${citizen.offenses ? 1 : 0})
-    `);
-    int|string? lastInsertId = result.lastInsertId;
-    if lastInsertId is int {
-        return lastInsertId;
-    } else {
-        return error("Unable to obtain last insert ID");
-    }
-}
+import ballerina/log;
 
 isolated function getCitizen(int id) returns Citizen|error {
-    Citizen citizen = check dbClient->queryRow(
-        `SELECT * FROM Citizen WHERE id = ${id}`
-    );
-    return citizen;
+   Citizen | error citizen = dbclient->/citizens/[id];
+    if citizen is error {
+         return citizen;
+    } else {
+         return citizen;
+    }
 }
 isolated function getCitizenByNIC(string nic) returns Citizen|error {
-    Citizen citizen = check dbClient->queryRow(
-        `SELECT * FROM Citizen WHERE nic = '${nic}'`
-    );
-    return citizen;
+    panic error("Not implemented");
 }
 
 isolated function getAllCitizens() returns Citizen[]|error {
-    Citizen[] citizens = [];
-    stream<Citizen, error?> resultStream = dbClient->query(
-        `SELECT * FROM Citizen`
-    );
-    check from Citizen citizen in resultStream
-        do {
-            citizens.push(citizen);
-        };
-    check resultStream.close();
-    return citizens;
-}
-
-isolated function updateCitizen(Citizen citizen) returns int|error {
-    sql:ExecutionResult result = check dbClient->execute(`
-        UPDATE Citizen SET
-        nic = '${citizen.nic}',
-        fullname = '${citizen.fullname}',
-        offenses = ${citizen.offenses ? 1 : 0}
-        WHERE id = ${citizen.id}
-    `);
-    int|string? lastInsertId = result.lastInsertId;
-    if lastInsertId is int {
-        return lastInsertId;
+    Citizen[]|error citizens = from var citizen in dbclient->/citizens(targetType = Citizen)
+        select citizen;
+    if citizens is error {
+        log:printError("Error while retrieving citizens from the database", 'error = citizens);
+        return citizens;
     } else {
-        return error("Unable to obtain last insert ID");
-    }
-}
-
-isolated function removeCitizen(int id) returns int|error {
-    sql:ExecutionResult result = check dbClient->execute(`
-        DELETE FROM Citizen WHERE id = ${id}
-    `);
-    int? affectedRowCount = result.affectedRowCount;
-    if affectedRowCount is int {
-        return affectedRowCount;
-    } else {
-        return error("Unable to obtain the affected row count");
+        return citizens;
     }
 }
 
 isolated function getOffensesForCitizen(int id) returns Offense[]|error? {
-    Offense[] offenses = [];
-    stream<Offense, error?> resultStream = dbClient->query(
-        `SELECT offense FROM Offense WHERE citizen_id = ${id}`
-    );
-    check from Offense offense in resultStream
-        do {
-            offenses.push(offense);
-        };
-    check resultStream.close();
-    return offenses;
+    Offense[]|error? offenses = from var offense in dbclient->/offenses(targetType = Offense)
+        where offense.citizenId == id
+        select offense;
+    if offenses is error {
+        log:printError("Error while retrieving offenses from the database", 'error = offenses);
+        return offenses;
+    } else {
+        return offenses;
+    }
 }
+
+function initializeDbClient() returns Client|error {
+    return new Client();
+}
+final Client dbclient = check initializeDbClient();
+
+
+    // resource function get books() returns Book[]|http:InternalServerError {
+    //     Book[]|error books = from var book in booksDb->/books(targetType = Book)
+    //         select book;
+    //     if books is error {
+    //         log:printError("Error while retrieving books from the database", 'error = books);
+    //         return http:INTERNAL_SERVER_ERROR;
+    //     } else {
+    //         return books;
+    //     }
+    // }
+
+    // resource function get book/[string bookId]() returns Book|http:NotFound|http:InternalServerError {
+    //     Book|error book = booksDb->/books/[bookId];
+    //     if book is persist:NotFoundError {
+    //         return http:NOT_FOUND;
+    //     } else if book is error {
+    //         log:printError("Error while retrieving book from the database", bookId = bookId, 'error = book);
+    //         return http:INTERNAL_SERVER_ERROR;
+    //     } else {
+    //         return book;
+    //     }
+    // }
+
+
+// Create a new `employee` record.
+// EmployeeInsert employee = {id: 1, name: "John", age: 30, salary: 3000.0};
+// int[]|error employeeId = sClient->/employees.post([employee]);
+
+// // Get the `employee` record with the ID 1.
+// Employee|error employee = sClient->/employees/1;
+
+// // Update the `employee` record with the ID 1.
+// Employee|error updated = sClient->/employees/1.put({salary: 4000.0});
+
+// // Delete the employee record with the ID 1.
+// Employee|error deleted = sClient->/employees/1.delete();
+
+// // Get records of all employees.
+// stream<Employee, error?> employees = sClient->/employees;
