@@ -2,7 +2,7 @@ import ballerina/http;
 
 service / on new http:Listener(8080) {
 
-    isolated resource function get citizens/[int id]() returns Citizen|error? {
+    isolated resource function get citizens/[string id]() returns Citizen|error? {
         return getCitizen(id);
     }
 
@@ -10,7 +10,7 @@ service / on new http:Listener(8080) {
         return getAllCitizens();
     }
 
-    isolated resource function get offenses/[int id]() returns Offense[]|error? {
+    isolated resource function get offenses/[string id]() returns Offense[]|error? {
         return getOffensesForCitizen(id);
     }
 
