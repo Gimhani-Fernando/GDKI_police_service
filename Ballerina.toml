@@ -1,6 +1,6 @@
 [package]
 org = "dineth"
-name = "police_service"
+name = "GDKI_police_service"
 version = "0.1.0"
 distribution = "2201.8.2"
 
@@ -9,7 +9,7 @@ observabilityIncluded = true
 
 [persist]
 datastore = "mysql"
-module = "police_service"
+module = "GDKI_police_service"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
