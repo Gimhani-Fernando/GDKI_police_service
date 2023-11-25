@@ -33,7 +33,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "constraint"
-version = "1.5.0"
+version = "1.4.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -368,7 +368,7 @@ modules = [
 
 [[package]]
 org = "dineth"
-name = "police_service"
+name = "GDKI_police_service"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
@@ -384,6 +384,6 @@ dependencies = [
 	{org = "ballerinax", name = "persist.sql"}
 ]
 modules = [
-	{org = "dineth", packageName = "police_service", moduleName = "police_service"}
+	{org = "dineth", packageName = "GDKI_police_service", moduleName = "GDKI_police_service"}
 ]
 
