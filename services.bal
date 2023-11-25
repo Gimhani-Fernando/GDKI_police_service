@@ -46,6 +46,17 @@ isolated function getOffensesForCitizen(string id) returns Offense[]|error? {
     }
 }
 
+isolated function checkOffenseExists(string id) returns boolean|error {
+    Offense[] offenses =  check getOffensesForCitizen(id) ?: [];
+    if (offenses.length() > 0) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+    
+
 isolated function addRequest(Citizen citizen) returns PoliceRequest|error {
 
     time:Date tnow = time:utcToCivil((time:utcNow()));
@@ -93,18 +104,3 @@ function initializeDbClient() returns Client|error {
 }
 
 final Client dbclient = check initializeDbClient();
-// Create a new workspace record.
-// WorkspaceInsert workspace = {id: "WK001", workspaceType: "Host Desk", locationCode: "B001"};
-// string[]|error workspaceId = sClient->/workspaces.post([workspace]);
-
-// // Get the workspace record with the ID: `WK001`.
-// Workspace|error workspace = sClient->/workspaces/WK001;
-
-// // Update the workspace record with the ID: `WK001`.
-// Workspace|error updated = sClient->/workspaces/WK001.put({workspaceType: "Cubical"});
-
-// // Delete the workspace record with the ID: `WK001`.
-// Workspace|error deleted = sClient->/workspaces/WK001.delete();
-
-// // Get all the workspace records.
-// stream<Workspace, error?> workspaces = sClient->/workspaces;
