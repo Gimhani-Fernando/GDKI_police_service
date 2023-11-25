@@ -2,7 +2,7 @@ import ballerina/persist as _;
 import ballerina/time;
 
 public type Citizen record {|
-    readonly int id;
+    readonly string id;
     string nic;
     string fullname;
     boolean isCriminal;
@@ -11,15 +11,16 @@ public type Citizen record {|
 |};
 
 public type Offense record {|
-    readonly int id;
+    readonly string id;
     string offense;
     Citizen citizen;
 |};
 
 public type PoliceRequest record {|
-    readonly int id;
+    readonly string id;
     Citizen citizen;
     string status;
+    string? reason;
     time:Date appliedTime;
 |};
 

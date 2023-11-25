@@ -1,16 +1,26 @@
-import ballerinax/mysql.driver as _;
 import ballerina/log;
+import ballerina/uuid;
+import ballerinax/mysql.driver as _;
+import ballerina/time;
 
-isolated function getCitizen(int id) returns Citizen|error {
-   Citizen | error citizen = dbclient->/citizens/[id];
+isolated function getCitizen(string id) returns Citizen|error {
+    Citizen|error citizen = dbclient->/citizens/[id];
     if citizen is error {
-         return citizen;
+        return citizen;
     } else {
-         return citizen;
+        return citizen;
     }
 }
+
 isolated function getCitizenByNIC(string nic) returns Citizen|error {
-    panic error("Not implemented");
+    Citizen[]|error citizens = from var citizen in dbclient->/citizens(targetType = Citizen)
+        where citizen.nic == nic
+        select citizen;
+    if citizens is Citizen[] {
+        return citizens[0];
+    } else {
+        return citizens;
+    }
 }
 
 isolated function getAllCitizens() returns Citizen[]|error {
@@ -24,7 +34,7 @@ isolated function getAllCitizens() returns Citizen[]|error {
     }
 }
 
-isolated function getOffensesForCitizen(int id) returns Offense[]|error? {
+isolated function getOffensesForCitizen(string id) returns Offense[]|error? {
     Offense[]|error? offenses = from var offense in dbclient->/offenses(targetType = Offense)
         where offense.citizenId == id
         select offense;
@@ -36,48 +46,61 @@ isolated function getOffensesForCitizen(int id) returns Offense[]|error? {
     }
 }
 
+isolated function checkOffenseExists(string id) returns boolean|error {
+    Offense[] offenses =  check getOffensesForCitizen(id) ?: [];
+    if (offenses.length() > 0) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+    
+
+isolated function addRequest(Citizen citizen) returns PoliceRequest|error {
+
+    time:Date tnow = time:utcToCivil((time:utcNow()));
+    PoliceRequest request = {id: uuid:createType4AsString(), citizenId: citizen.id, status: "PENDING", appliedTime: tnow, reason: ""};
+    string[]|error added = dbclient->/policerequests.post([request]);
+    if added is error {
+        return added;
+    } else {
+        return request;
+    }
+}
+
+isolated function getRequest(string id) returns PoliceRequest|error {
+    PoliceRequest|error request = dbclient->/policerequests/[id];
+    if request is error {
+        return request;
+    } else {
+        return request;
+    }
+}
+
+isolated function getRequestsForCitizen(string id) returns PoliceRequest[]|error? {
+    PoliceRequest[]|error? requests = from var request in dbclient->/policerequests(targetType = PoliceRequest)
+        where request.citizenId == id
+        select request;
+    if requests is error {
+        log:printError("Error while retrieving requests from the database", 'error = requests);
+        return requests;
+    } else {
+        return requests;
+    }
+}
+
+isolated function updateRequestStatus(string id, string status) returns ()|error {
+    PoliceRequest|error updated = dbclient->/policerequests/[id].put({status: status});
+    if updated is error {
+        return updated;
+    } else {
+        return ();
+    }
+}
+
 function initializeDbClient() returns Client|error {
     return new Client();
 }
+
 final Client dbclient = check initializeDbClient();
-
-
-    // resource function get books() returns Book[]|http:InternalServerError {
-    //     Book[]|error books = from var book in booksDb->/books(targetType = Book)
-    //         select book;
-    //     if books is error {
-    //         log:printError("Error while retrieving books from the database", 'error = books);
-    //         return http:INTERNAL_SERVER_ERROR;
-    //     } else {
-    //         return books;
-    //     }
-    // }
-
-    // resource function get book/[string bookId]() returns Book|http:NotFound|http:InternalServerError {
-    //     Book|error book = booksDb->/books/[bookId];
-    //     if book is persist:NotFoundError {
-    //         return http:NOT_FOUND;
-    //     } else if book is error {
-    //         log:printError("Error while retrieving book from the database", bookId = bookId, 'error = book);
-    //         return http:INTERNAL_SERVER_ERROR;
-    //     } else {
-    //         return book;
-    //     }
-    // }
-
-
-// Create a new `employee` record.
-// EmployeeInsert employee = {id: 1, name: "John", age: 30, salary: 3000.0};
-// int[]|error employeeId = sClient->/employees.post([employee]);
-
-// // Get the `employee` record with the ID 1.
-// Employee|error employee = sClient->/employees/1;
-
-// // Update the `employee` record with the ID 1.
-// Employee|error updated = sClient->/employees/1.put({salary: 4000.0});
-
-// // Delete the employee record with the ID 1.
-// Employee|error deleted = sClient->/employees/1.delete();
-
-// // Get records of all employees.
-// stream<Employee, error?> employees = sClient->/employees;
