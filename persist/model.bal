@@ -21,7 +21,7 @@ public type PoliceRequest record {|
     Citizen citizen;
     string status;
     string? reason;
-    time:Date appliedTime;
+    time:Utc appliedTime;
 |};
 
 

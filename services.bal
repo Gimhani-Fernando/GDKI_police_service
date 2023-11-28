@@ -59,7 +59,7 @@ isolated function checkOffenseExists(string id) returns boolean|error {
 
 isolated function addRequest(Citizen citizen) returns PoliceRequest|error {
 
-    time:Date tnow = time:utcToCivil((time:utcNow()));
+    time:Utc tnow = time:utcNow();
     PoliceRequest request = {id: uuid:createType4AsString(), citizenId: citizen.id, status: "PENDING", appliedTime: tnow, reason: ""};
     string[]|error added = dbclient->/policerequests.post([request]);
     if added is error {
