@@ -2,6 +2,7 @@ import ballerina/log;
 import ballerina/uuid;
 import ballerinax/mysql.driver as _;
 import ballerina/time;
+import ballerina/http;
 
 isolated function getCitizen(string id) returns Citizen|error {
     Citizen|error citizen = dbclient->/citizens/[id];
@@ -98,7 +99,29 @@ isolated function updateRequestStatus(string id, string status) returns ()|error
         return ();
     }
 }
+isolated function checkCitizenHasValidIdentityRequests(string nic) returns boolean|error{
+    string url = identity_url + "/identity/requests/validate/" + nic;
+    http:Client NewClient = check new(url);
+    boolean |error response = check NewClient->/.get();
+    if (response is error) {
+        return false;
+    }
+    return response;
+}
+isolated function checkCitizenHasValidAddressRequests(string nic) returns boolean|error{
+    string url = address_url + "/address/requests/validate/" + nic;
+    http:Client NewClient = check new(url);
+    boolean |error response = check NewClient->/.get();
+    if (response is error) {
+        return false;
+    }
+    return response;
 
+
+}
+
+configurable string address_url = ?;
+configurable string identity_url = ?;
 function initializeDbClient() returns Client|error {
     return new Client();
 }

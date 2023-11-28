@@ -14,10 +14,25 @@ service /police on new http:Listener(8080) {
         Citizen|error citizen = getCitizenByNIC(nic);
         if (citizen is Citizen) {
             PoliceRequest addedrequest = check addRequest(citizen);
-            if (check checkOffenseExists(citizen.id)) {
+            boolean|error IdentityIsValid = checkCitizenHasValidIdentityRequests(nic);
+            boolean|error AddressIsValid = checkCitizenHasValidAddressRequests(nic);
+            boolean|error OffenseExists = checkOffenseExists(citizen.id); 
+
+            if (IdentityIsValid is error || AddressIsValid is error || OffenseExists is error){
                 check updateRequestStatus(addedrequest.id, "Rejected");
                 addedrequest.status = "Rejected";
-            } else {
+            }
+            if ( !(check IdentityIsValid) || !(check AddressIsValid) || check OffenseExists ){
+                check updateRequestStatus(addedrequest.id, "Rejected");
+                addedrequest.status = "Rejected";
+            }
+            
+
+            // if (check checkOffenseExists(citizen.id)) {
+            //     check updateRequestStatus(addedrequest.id, "Rejected");
+            //     addedrequest.status = "Rejected";
+            // }
+             else {
                 check updateRequestStatus(addedrequest.id, "Cleared");
                 addedrequest.status = "Cleared";
             }
