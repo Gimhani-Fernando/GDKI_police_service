@@ -1,3 +1,5 @@
+module GDKI_police_service.persist;
+
 import ballerina/persist as _;
 import ballerina/time;
 
