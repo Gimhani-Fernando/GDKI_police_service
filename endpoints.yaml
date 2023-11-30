@@ -1,0 +1,7 @@
+version: 0.1
+endpoints:
+  - name: PoliceService
+    port: 8080
+    type: REST
+    networkVisibility: Project
+    context: /police
