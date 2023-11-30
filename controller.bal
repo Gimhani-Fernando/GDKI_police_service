@@ -1,6 +1,6 @@
 import ballerina/http;
 import ballerinax/vonage.sms as vs;
-import persist/model;
+import GDKI_police_service.persist;
 
 service /police on new http:Listener(8080) {
     isolated resource function get requests/[string nic]() returns PoliceRequest[]|error? {
