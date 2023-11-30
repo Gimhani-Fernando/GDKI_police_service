@@ -5,6 +5,7 @@ import ballerina/time;
 import ballerina/http;
 import ballerinax/vonage.sms as vs;
 
+
 isolated function getCitizen(string id) returns Citizen|error {
     Citizen|error citizen = dbclient->/citizens/[id];
     if citizen is error {

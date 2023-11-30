@@ -399,6 +399,7 @@ dependencies = [
 	{org = "ballerinax", name = "vonage.sms"}
 ]
 modules = [
-	{org = "dineth", packageName = "GDKI_police_service", moduleName = "GDKI_police_service"}
+	{org = "dineth", packageName = "GDKI_police_service", moduleName = "GDKI_police_service"},
+	{org = "dineth", packageName = "GDKI_police_service", moduleName = "GDKI_police_service.persist"}
 ]
 
